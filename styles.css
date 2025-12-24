@@ -46,7 +46,7 @@
  }
  .lightbox {
     position: fixed;
-    display: flex;
+    display: none;
     inset: 0;
     justify-content: center;
     background: rgba(0,0,0,0.9);

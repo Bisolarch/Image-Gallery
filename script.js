@@ -1,47 +1,96 @@
+/* 
+   SELECT ELEMENTS
+ */
 const images = document.querySelectorAll('.gallery img');
 const lightbox = document.querySelector('.lightbox');
 const lightboxImg = document.querySelector('.lightbox-img');
 const closeBtn = document.querySelector('.close');
 const nextBtn = document.querySelector('.next');
 const prevBtn = document.querySelector('.prev');
-let currentIndex = 0;
+const filterButtons = document.querySelectorAll('.filter-buttons button');
 
-/* Open Lightbox */
+let currentIndex = 0;
+let visibleImages = [];
+
+/* 
+   OPEN LIGHTBOX
+ */
 images.forEach((img, index) => {
   img.addEventListener('click', () => {
-    currentIndex = index;
-    lightbox.style.display = 'flex';
+    visibleImages = Array.from(images).filter(image => {
+      const wrapper = image.closest('figure') || image;
+      return wrapper.style.display !== 'none';
+    });
+
+    currentIndex = visibleImages.indexOf(img);
     lightboxImg.src = img.src;
+    lightbox.style.display = 'flex';
   });
 });
 
-/* Close Lightbox */
+/* 
+   CLOSE LIGHTBOX */
 closeBtn.addEventListener('click', () => {
   lightbox.style.display = 'none';
 });
 
-/* Next Image */
+/* 
+   NEXT IMAGE
+ */
 nextBtn.addEventListener('click', () => {
-  currentIndex = (currentIndex + 1) % images.length;
-  lightboxImg.src = images[currentIndex].src;
+  if (!visibleImages.length) return;
+
+  currentIndex = (currentIndex + 1) % visibleImages.length;
+  lightboxImg.src = visibleImages[currentIndex].src;
 });
 
-/* Previous Image */
+/* 
+   PREVIOUS IMAGE */
 prevBtn.addEventListener('click', () => {
-  currentIndex = (currentIndex - 1 + images.length) % images.length;
-  lightboxImg.src = images[currentIndex].src;
+  if (!visibleImages.length) return;
+
+  currentIndex =
+    (currentIndex - 1 + visibleImages.length) % visibleImages.length;
+  lightboxImg.src = visibleImages[currentIndex].src;
 });
 
-/* Filter Images */
-document.querySelectorAll('.filter-buttons button').forEach(button => {
+/*
+   FILTER IMAGES (FIXED)
+*/
+filterButtons.forEach(button => {
   button.addEventListener('click', () => {
     const filter = button.dataset.filter;
+
     images.forEach(img => {
-      img.style.display =
-        filter === 'all' || img.dataset.category === filter
-          ? 'block'
-          : 'none';
+      const wrapper = img.closest('figure') || img;
+
+      if (filter === 'all' || img.dataset.category === filter) {
+        wrapper.style.display = '';
+      } else {
+        wrapper.style.display = 'none';
+      }
     });
   });
 });
+
+/* 
+   CLOSE LIGHTBOX ON OVERLAY CLICK
+ */
+lightbox.addEventListener('click', e => {
+  if (e.target === lightbox) {
+    lightbox.style.display = 'none';
+  }
+});
+
+/* 
+   KEYBOARD NAVIGATION (BONUS) */
+document.addEventListener('keydown', e => {
+  if (lightbox.style.display !== 'flex') return;
+
+  if (e.key === 'ArrowRight') nextBtn.click();
+  if (e.key === 'ArrowLeft') prevBtn.click();
+  if (e.key === 'Escape') lightbox.style.display = 'none';
+});
+
+
  
